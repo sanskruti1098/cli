@@ -171,11 +171,23 @@ else
     export TEST_CLIENT_BINARY="${PWD}/tkn"
 fi
 
-if [[ -d ./test/e2e/clustertask ]]; then
-  go_test_e2e ./test/e2e/... || failed=1
+GOARCH=$(go env GOARCH)
+
+PKGS=(
+  ./test/e2e/eventlistener
+  ./test/e2e/pipeline
+  ./test/e2e/pipelinerun
+  ./test/e2e/plugin
+  ./test/e2e/task
+)
+
+if [[ "$GOARCH" == "ppc64le" ]]; then
+  echo "Running Go e2e tests without -race on ppc64le"
+  go test -v -count=1 -tags=e2e -timeout=20m "${PKGS[@]}" || failed=1
 else
-  echo "Skipping Go e2e tests: test/e2e/clustertask directory does not exist"
+  go test -race -v -count=1 -tags=e2e -timeout=20m "${PKGS[@]}" || failed=1
 fi
+
 
 (( failed )) && fail_test
 

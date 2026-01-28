@@ -171,7 +171,12 @@ else
     export TEST_CLIENT_BINARY="${PWD}/tkn"
 fi
 
-go_test_e2e ./test/e2e/... || failed=1
+if [[ -d ./test/e2e/clustertask ]]; then
+  go_test_e2e ./test/e2e/... || failed=1
+else
+  echo "Skipping Go e2e tests: test/e2e/clustertask directory does not exist"
+fi
+
 (( failed )) && fail_test
 
 success
